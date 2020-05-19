@@ -137,6 +137,55 @@ public:
 		}
 	}
 
+	// Method 3) - Replace std::complex with just hard coded mathematics
+	void CreateFractalNoComplex(const olc::vi2d& pix_tl, const olc::vi2d& pix_br, const olc::vd2d& frac_tl, const olc::vd2d& frac_br, const int iterations)
+	{
+		double x_scale = (frac_br.x - frac_tl.x) / (double(pix_br.x) - double(pix_tl.x));
+		double y_scale = (frac_br.y - frac_tl.y) / (double(pix_br.y) - double(pix_tl.y));
+
+		double x_pos = frac_tl.x;
+		double y_pos = frac_tl.y;
+
+		int y_offset = 0;
+		int row_size = ScreenWidth();
+
+		int x, y, n;
+
+		double cr = 0;
+		double ci = 0;
+		double zr = 0;
+		double zi = 0;
+		double re = 0;
+		double im = 0;
+
+		for (y = pix_tl.y; y < pix_br.y; y++)
+		{
+			x_pos = frac_tl.x;
+			ci = y_pos;
+			for (x = pix_tl.x; x < pix_br.x; x++)
+			{
+				cr = x_pos;
+				zr = 0;
+				zi = 0;
+
+				n = 0;
+				while ((zr * zr + zi * zi) < 4.0 && n < iterations)
+				{
+					re = zr * zr - zi * zi + cr;
+					im = zr * zi * 2.0 + ci;
+					zr = re;
+					zi = im;
+					n++;
+				}
+
+				pFractal[y_offset + x] = n;
+				x_pos += x_scale;
+			}
+
+			y_pos += y_scale;
+			y_offset += row_size;
+		}
+	}
 
 	bool OnUserUpdate(float fElapsedTime) override
 	{
@@ -204,7 +253,7 @@ public:
 		{
 		case 0: CreateFractalBasic(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
 		case 1: CreateFractalPreCalculate(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
-		// case 2: CreateFractalNoComplex(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
+		case 2: CreateFractalNoComplex(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
 		// case 3: CreateFractalIntrinsics(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
 		// case 4: CreateFractalThreads(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
 		// case 5: CreateFractalThreadPool(pix_tl, pix_br, frac_tl, frac_br, nIterations); break;
@@ -233,7 +282,7 @@ public:
 		{
 		case 0: DrawString(0, 0, "1) Naive Method", olc::WHITE, 3); break;
 		case 1: DrawString(0, 0, "2) Precalculate Method", olc::WHITE, 3); break;
-		// case 2: DrawString(0, 0, "3) Hand-code Maths Method", olc::WHITE, 3); break;
+		case 2: DrawString(0, 0, "3) Hand-code Maths Method", olc::WHITE, 3); break;
 		// case 3: DrawString(0, 0, "4) Vector Extensions (AVX2) Method", olc::WHITE, 3); break;
 		// case 4: DrawString(0, 0, "5) Threads Method", olc::WHITE, 3); break;
 		// case 5: DrawString(0, 0, "6) ThreadPool Method", olc::WHITE, 3); break;
